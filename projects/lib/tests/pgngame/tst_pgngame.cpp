@@ -7,6 +7,13 @@
 #include <pgnstream.h>
 #include <board/board.h>
 #include <memory>
+/**
+ * @brief The tst_PgnGame class
+ * PGN Value for Alexander Alekhine vs Oscar Tenner is from:
+ * https://www.chessgames.com/perl/chessgame?gid=1076122
+ * PGN Value for Jens Hohmeister vs Peter Wolff is from:
+ * https://www.chessgames.com/perl/chessgame?gid=1259990
+ */
 
 class tst_PgnGame: public QObject {
 	Q_OBJECT
@@ -85,6 +92,7 @@ void tst_PgnGame::saveGameState_data()
 	QTest::addColumn<QString>("result");
 	QTest::addColumn<QString>("expectedSnippet");
 
+	// Starting games
 	QTest::newRow("starting-game")
 		<<QStringList{}
 		<< QString("*")
@@ -93,6 +101,33 @@ void tst_PgnGame::saveGameState_data()
 		<<QStringList{"e4"}
 		<< QString("*")
 		<< QString("*");
+
+	// Mid-Games
+	QTest::newRow("mid-game-alexander-alekhine-vs-oscar-tenner")
+		<<QStringList{
+						 "e4", "e5",
+						 "f4", "Bc5",
+						 "Nf3", "d6",
+						 "Nc3", "Nf6",
+						 "Bc4", "Nc6",
+						 "d3", "Bg4",
+						 "Na4", "exf4",
+						 "Nxc5", "dxc5",
+	}
+		<< QString("*")
+		<< QString("*");
+	QTest::newRow("mid-game-jens-hohmeister-vs-peter-wolf")
+		<<QStringList{
+			   "e4", "e5",
+			   "Nf3", "Nc6",
+			   "Bb5", "a6",
+			   "Ba4", "Nf6",
+			   "O-O", "Nxe4",
+			   "Re1", "d5",
+	}
+		<< QString("*")
+		<< QString("*");
+
 
 }
 
