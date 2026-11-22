@@ -89,6 +89,10 @@ void tst_PgnGame::saveGameState_data()
 		<<QStringList{}
 		<< QString("*")
 		<< QString("*");
+	QTest::newRow("first-move-e4")
+		<<QStringList{"e4"}
+		<< QString("*")
+		<< QString("*");
 
 }
 
