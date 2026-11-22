@@ -161,6 +161,43 @@ void tst_PgnGame::saveGameState_data()
 		<< QString("*")
 		<< QString("*");
 
+	// End-Games
+	QTest::newRow("end-game-alexander-alekhine-vs-oscar-tenner")
+		<<QStringList{
+			 "e4", "e5",
+			 "f4", "Bc5",
+			 "Nf3", "d6",
+			 "Nc3", "Nf6",
+			 "Bc4", "Nc6",
+			 "d3", "Bg4",
+			 "Na4", "exf4",
+			 "Nxc5", "dxc5",
+			   "Bxf4", "Nh5",
+			   "Be3", "Ne5",
+			   "Nxe5", "Bxd1",
+			   "Bxf7+", "Ke7",
+			   "Bxc5+", "Kf6",
+			   "O-O+", "Kxe5",
+			   "Rf5#"
+		   }
+		<< QString("1-0")
+		<< QString("1-0");
+
+	QTest::newRow("end-game-jens-hohmeister-vs-peter-wolf")
+		<<QStringList{
+			   "e4", "e5",
+			   "Nf3", "Nc6",
+			   "Bb5", "a6",
+			   "Ba4", "Nf6",
+			   "O-O", "Nxe4",
+			   "Re1", "d5",
+			   "Nxe5", "Bd6",
+			   "Nxc6", "Bxh2+",
+			   "Kxh2", "Qh4+",
+			   "Kg1", "Qxf2+"
+	}
+		<< QString("1/2-1/2")
+		<< QString("1/2-1/2");
 }
 
 void tst_PgnGame::saveGameState(){
