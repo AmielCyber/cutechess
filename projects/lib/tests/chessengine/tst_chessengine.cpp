@@ -19,7 +19,7 @@
  * that a ChessEngine will use.
  * Ask EDU ChatGPT: "Build me a MockChessEngine for ChessEngine.h"
  */
-class MockEngineIODevice: public QIODevice
+class MockEngineIODevice : public QIODevice
 {
 public:
 	MockEngineIODevice()
@@ -59,7 +59,7 @@ protected:
  * order to avoid having a live engine running.
  * Ask EDU ChatGPT: "Build me a MockChessEngine for ChessEngine.h"
  */
-class MockChessEngine: public ChessEngine
+class MockChessEngine : public ChessEngine
 {
 public:
 	explicit MockChessEngine(bool respondToPing = true)
@@ -68,46 +68,62 @@ public:
 		setDevice(m_device);
 		addVariant("standard");
 	}
-	void setRespondToPing(bool respond){m_respondToPing = respond;}
-	void simulateCrash(){m_device->simulateCrash();}
-	QString protocol() const override{return "mock";}
-	void makeMove(const Chess::Move& move) override{Q_UNUSED(move);}
+	void setRespondToPing(bool respond)
+	{
+		m_respondToPing = respond;
+	}
+	void simulateCrash()
+	{
+		m_device->simulateCrash();
+	}
+	QString protocol() const override
+	{
+		return "mock";
+	}
+	void makeMove(const Chess::Move& move) override
+	{
+		Q_UNUSED(move);
+	}
+
 protected:
 	void startProtocol() override
 	{
-		QTimer::singleShot(0, this, [this](){
-			onProtocolStart();
-		});
-
+		QTimer::singleShot(0, this, [this]() { onProtocolStart(); });
 	}
-	void startGame() override{}
-	void startThinking() override{
-		if(!m_respondToPing)
+	void startGame() override
+	{
+	}
+	void startThinking() override
+	{
+		if (!m_respondToPing)
 			return;
 		// White moves, necessary for black to go next
 		QTimer::singleShot(0, this, [this]()
 		{
 			const Chess::Move move = board()->moveFromGenericMove(
-				Chess::GenericMove(Chess::Square(4,1), Chess::Square(4,3), 0)
-				);
+				Chess::GenericMove(Chess::Square(4, 1), Chess::Square(4, 3), 0));
 
 			emitMove(move);
 		});
-
 	}
-	void parseLine(const QString& line) override {Q_UNUSED(line);}
+	void parseLine(const QString& line) override
+	{
+		Q_UNUSED(line);
+	}
 	bool sendPing() override
 	{
-		if(m_respondToPing)
+		if (m_respondToPing)
 		{
-			QTimer::singleShot(0, this, [this](){
-				pong();
-			});
+			QTimer::singleShot(0, this, [this]() { pong(); });
 		}
 		return true;
 	}
-	void sendStop() override {}
-	void sendQuit() override {}
+	void sendStop() override
+	{
+	}
+	void sendQuit() override
+	{
+	}
 	void sendOption(const QString& name, const QVariant& value) override
 	{
 		Q_UNUSED(name);
@@ -117,19 +133,36 @@ protected:
 private:
 	MockEngineIODevice* m_device;
 	bool m_respondToPing;
-
 };
 
-class tst_ChessEngine: public QObject
+class tst_ChessEngine : public QObject
 {
 	Q_OBJECT
 
 private slots:
+	/**
+	 * @brief initTestCase Initiate timeout settings and temporary directory to use.
+	 */
 	void initTestCase();
+	/**
+	 * @brief frozenEngineForfeitsGame_data Add test table:
+	 * frozen side, expected winning side, expected losing side
+	 */
 	void frozenEngineForfeitsGame_data();
+	/**
+	 * @brief frozenEngineForfeitsGame Test for frozen engine scenerios
+	 */
 	void frozenEngineForfeitsGame();
+	/**
+	 * @brief crashedEngineForfeitsGame_data Add test table:
+	 * crashed side, expected winning side, expected losing side
+	 */
 	void crashedEngineForfeitsGame_data();
+	/**
+	 * @brief crashedEngineForfeitsGame Test for frozen engine scenerios
+	 */
 	void crashedEngineForfeitsGame();
+
 private:
 	void startEngine(MockChessEngine& engine, const QString& name);
 	QTemporaryDir m_settingsDir;
@@ -140,11 +173,7 @@ void tst_ChessEngine::initTestCase()
 	QVERIFY(m_settingsDir.isValid());
 
 	QSettings::setDefaultFormat(QSettings::IniFormat);
-	QSettings::setPath(
-		QSettings::IniFormat,
-		QSettings::UserScope,
-		m_settingsDir.path()
-		);
+	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, m_settingsDir.path());
 
 	QSettings settings;
 	settings.beginGroup("Timing");
@@ -162,7 +191,6 @@ void tst_ChessEngine::startEngine(MockChessEngine& engine, const QString& name)
 	config.setTimeoutScale(1.0);
 	engine.applyConfiguration(config);
 	engine.start();
-
 }
 void tst_ChessEngine::frozenEngineForfeitsGame_data()
 {
@@ -171,15 +199,12 @@ void tst_ChessEngine::frozenEngineForfeitsGame_data()
 	QTest::addColumn<Chess::Side>("expectedLoser");
 
 	QTest::newRow("white-engine-freezes")
-		<<Chess::Side(Chess::Side::White)
-		<<Chess::Side(Chess::Side::Black)
-		<<Chess::Side(Chess::Side::White);
+		<< Chess::Side(Chess::Side::White) << Chess::Side(Chess::Side::Black)
+		<< Chess::Side(Chess::Side::White);
 
 	QTest::newRow("black-engine-freezes")
-		<<Chess::Side(Chess::Side::Black)
-		<<Chess::Side(Chess::Side::White)
-		<<Chess::Side(Chess::Side::Black);
-
+		<< Chess::Side(Chess::Side::Black) << Chess::Side(Chess::Side::White)
+		<< Chess::Side(Chess::Side::Black);
 }
 
 void tst_ChessEngine::frozenEngineForfeitsGame()
@@ -195,12 +220,12 @@ void tst_ChessEngine::frozenEngineForfeitsGame()
 
 	// Act
 	// Set engine to not respond when called (simulates frozen)
-	if(frozenSide == Chess::Side::White)
+	if (frozenSide == Chess::Side::White)
 		whiteEngine.setRespondToPing(false);
 	else
 		blackEngine.setRespondToPing(false);
 
-	startEngine(whiteEngine,  "White Engine");
+	startEngine(whiteEngine, "White Engine");
 	startEngine(blackEngine, "Black Engine");
 
 	// Assert that both players are idle before frozen engine starts game
@@ -221,13 +246,9 @@ void tst_ChessEngine::frozenEngineForfeitsGame()
 	game.setTimeControl(timeControl);
 
 	// Spy to check if game is finished
-	QSignalSpy finishedSpy(
-		&game,
-		&ChessGame::finished
-		);
+	QSignalSpy finishedSpy(&game, &ChessGame::finished);
 
 	game.start();
-
 
 	// Assert
 	// Asserts the game has ended after the chess engine freezes
@@ -236,28 +257,92 @@ void tst_ChessEngine::frozenEngineForfeitsGame()
 	QVERIFY(game.isFinished());
 
 	// Assert game ended due to a chess engine froze
-	QCOMPARE(
-		game.result().type(),
-		Chess::Result::StalledConnection
-		);
+	QCOMPARE(game.result().type(), Chess::Result::StalledConnection);
 
 	// Asserts the frozen chess engine game is marked as a lost
-	QCOMPARE(
-		game.result().winner(),
-		expectedWinner
-		);
-	QCOMPARE(
-		game.result().loser(),
-		expectedLoser
-		);
+	QCOMPARE(game.result().winner(), expectedWinner);
+	QCOMPARE(game.result().loser(), expectedLoser);
 }
 void tst_ChessEngine::crashedEngineForfeitsGame_data()
 {
+	QTest::addColumn<Chess::Side>("crashedSide");
+	QTest::addColumn<Chess::Side>("expectedWinner");
+	QTest::addColumn<Chess::Side>("expectedLoser");
 
+	QTest::newRow("white-engine-crashes")
+		<< Chess::Side(Chess::Side::White) << Chess::Side(Chess::Side::Black)
+		<< Chess::Side(Chess::Side::White);
+
+	QTest::newRow("black-engine-crashes")
+		<< Chess::Side(Chess::Side::Black) << Chess::Side(Chess::Side::White)
+		<< Chess::Side(Chess::Side::Black);
 }
 void tst_ChessEngine::crashedEngineForfeitsGame()
 {
+	// Arrange
+	QFETCH(Chess::Side, crashedSide);
+	QFETCH(Chess::Side, expectedWinner);
+	QFETCH(Chess::Side, expectedLoser);
+	PgnGame pgn;
 
+	MockChessEngine whiteEngine;
+	MockChessEngine blackEngine;
+
+	// Act
+	// Set engine to not respond when called (simulates frozen)
+	if (crashedSide == Chess::Side::White)
+		whiteEngine.setRespondToPing(false);
+	else
+		blackEngine.setRespondToPing(false);
+
+	startEngine(whiteEngine, "White Engine");
+	startEngine(blackEngine, "Black Engine");
+
+	// Assert that both players are idle before crashed engine starts game
+	QTRY_COMPARE(whiteEngine.state(), ChessPlayer::Idle);
+	QTRY_COMPARE(blackEngine.state(), ChessPlayer::Idle);
+
+	Chess::Board* board = Chess::BoardFactory::create("standard");
+	QVERIFY(board != nullptr);
+
+	ChessGame game(board, &pgn);
+
+	game.setPlayer(Chess::Side::White, &whiteEngine);
+	game.setPlayer(Chess::Side::Black, &blackEngine);
+
+	// Go ahead in time when timeout is reached so we dont wait
+	TimeControl timeControl("60");
+	QVERIFY(timeControl.isValid());
+	game.setTimeControl(timeControl);
+
+	// Spy to check if game is finished
+	QSignalSpy finishedSpy(&game, &ChessGame::finished);
+
+	game.start();
+
+	// Wait till the engine gets its turn so we can crash it
+	if (crashedSide == Chess::Side::White)
+	{
+		QTRY_COMPARE(whiteEngine.state(), ChessPlayer::Thinking);
+		whiteEngine.simulateCrash();
+	}
+	else
+	{
+		QTRY_COMPARE(blackEngine.state(), ChessPlayer::Thinking);
+		blackEngine.simulateCrash();
+	}
+
+	// Assert
+	// Asserts the game has ended after the chess engine crashes
+	QTRY_VERIFY_WITH_TIMEOUT(game.isFinished(), 1000);
+	QTRY_COMPARE_WITH_TIMEOUT(finishedSpy.count(), 1, 1000);
+
+	// Assert game ended due to a chess engine crash
+	QCOMPARE(game.result().type(), Chess::Result::Disconnection);
+
+	// Asserts the crashed chess engine game is marked as a lost
+	QCOMPARE(game.result().winner(), expectedWinner);
+	QCOMPARE(game.result().loser(), expectedLoser);
 }
 QTEST_MAIN(tst_ChessEngine)
 #include "tst_chessengine.moc"
