@@ -322,8 +322,8 @@ macro(add_gui_test test_name test_src)
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/projects/gui/src
     )
 target_link_libraries(test_${test_name} PRIVATE Qt::Core Qt::Gui Qt::Widgets Qt::Svg Qt::Test lib)
-add_test(NAME test_${test_name} COMMAND test_${test_name})
-endmacro()
+add_test(test_${test_name} test_${test_name})
+endmacro(add_gui_test)
 
 add_gui_test(boardscene projects/gui/tests/boardscene/tst_boardscene.cpp)
 target_sources(test_boardscene PRIVATE ${BOARDSCENE_TEST_SOURCES})
