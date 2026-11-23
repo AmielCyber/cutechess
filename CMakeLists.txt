@@ -323,6 +323,12 @@ macro(add_gui_test test_name test_src)
     )
 target_link_libraries(test_${test_name} PRIVATE Qt::Core Qt::Gui Qt::Widgets Qt::Svg Qt::Test lib)
 add_test(test_${test_name} test_${test_name})
+
+set_tests_properties(
+    test_${test_name}
+    PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)
 endmacro(add_gui_test)
 
 add_gui_test(boardscene projects/gui/tests/boardscene/tst_boardscene.cpp)
