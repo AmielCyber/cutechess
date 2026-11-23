@@ -34,7 +34,7 @@ private slots:
 
 private:
 	/**
-	 * @brief getGraphicsBoard Gets the GraphiBoard from BoardScene that is in charge
+	 * @brief getGraphicsBoard Gets the GraphicsBoard from BoardScene that is in charge
 	 * of rendering the board to the UI
 	 * @param scene The BoardScene that is in charge of maintaining the state and
 	 * updating the UI by GraphicBoard
