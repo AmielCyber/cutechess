@@ -1835,6 +1835,11 @@ void tst_Board::perft_data() const
 
 void tst_Board::perft()
 {
+#ifdef QT_DEBUG
+	qInfo() << "Note: tstBoard::perft may take around 2 minutes in a Debug build."
+			   "For faster test execution, select the Release build configuration from Qt Creator's build configuration selector."
+			   "Or run the tests in the terminal using ctest";
+#endif
 	QFETCH(QString, variant);
 	QFETCH(QString, fen);
 	QFETCH(int, depth);
