@@ -21,11 +21,16 @@ private slots:
 	 */
 	void beforeMove();
 
+	/**
+	 * @brief selfMove_data Sets the test table as: FEN string, Move string, and expected result.
+	 */
 	void selfMove_data();
+	/**
+	 * Performs the move operation and verifies the UI representation reflects that move and
+	 * the squares in the backend chess board.
+	 * @brief selfMove
+	 */
 	void selfMove();
-
-	void opponentMove_data();
-	void opponentMove();
 
 private:
 	/**
@@ -74,10 +79,7 @@ void tst_BoardScene::verifySynchronization(const BoardScene& boardScene)
 		{
 			Chess::Square square(file, rank);
 
-			Chess::Piece expected = board->pieceAt(square);
-			Chess::Piece actual = graphicsBoard->pieceTypeAt(square);
-
-			QCOMPARE(actual, expected);
+			QTRY_COMPARE(graphicsBoard->pieceTypeAt(square), board->pieceAt(square));
 		}
 	}
 }
@@ -116,18 +118,83 @@ void tst_BoardScene::beforeMove()
 
 void tst_BoardScene::selfMove_data()
 {
+	QTest::addColumn<QString>("fen");
+	QTest::addColumn<QString>("move");
+	QTest::addColumn<Chess::Result::Type>("expectedResult");
+
+	// Values provided by ChatGPT: "Give me FEN values and move string
+	// for the following scenerios: no capture white player with pending game, no capture black
+	// player with pending game, capture white player with pending game, capture black player with
+	// pending game, capture black player piece with winning game, capture white player piece with winning game"
+
+	QTest::newRow("white-no-capture-pending")
+		<< QString("7k/8/8/8/8/8/4P3/7K w - - 0 1")
+		<< QString("e2e4")
+		<< Chess::Result::NoResult;
+
+	QTest::newRow("black-no-capture-pending")
+		<< QString("7k/4p3/8/8/8/8/8/7K b - - 0 1")
+		<< QString("e7e5")
+		<< Chess::Result::NoResult;
+
+	QTest::newRow("white-no-capture-win")
+		<< QString("7k/8/5KQ1/8/8/8/8/8 w - - 0 1")
+		<< QString("g6g7")
+		<< Chess::Result::Win;
+
+	QTest::newRow("black-no-capture-win")
+		<< QString("8/8/8/8/8/5kq1/8/7K b - - 0 1")
+		<< QString("g3g2")
+		<< Chess::Result::Win;
+
+	QTest::newRow("white-capture-pending")
+		<< QString("7k/8/8/3p4/4P3/8/8/7K w - - 0 1")
+		<< QString("e4d5")
+		<< Chess::Result::NoResult;
+
+	QTest::newRow("black-capture-pending")
+		<< QString("7k/8/8/3p4/4P3/8/8/7K b - - 0 1")
+		<< QString("d5e4")
+		<< Chess::Result::NoResult;
+
+	QTest::newRow("black-capture-win")
+		<< QString("8/8/8/8/8/5kq1/6R1/7K b - - 0 1")
+		<< QString("g3g2")
+		<< Chess::Result::Win;
+
+	QTest::newRow("white-capture-win")
+		<< QString("7k/6r1/5KQ1/8/8/8/8/8 w - - 0 1")
+		<< QString("g6g7")
+		<< Chess::Result::Win;
 }
 
 void tst_BoardScene::selfMove()
 {
-}
+	// Arrange
+	QFETCH(QString, fen);
+	QFETCH(QString, move);
+	QFETCH(Chess::Result::Type, expectedResult);
 
-void tst_BoardScene::opponentMove_data()
-{
-}
+	Chess::Board* chessBoard(Chess::BoardFactory::create("standard"));
 
-void tst_BoardScene::opponentMove()
-{
+	if(chessBoard == nullptr)
+		QFAIL("Failed to create standard chess board");
+
+	QVERIFY(chessBoard->setFenString(fen));
+	BoardScene boardScene;
+	boardScene.setBoard(chessBoard);
+	boardScene.populate();
+
+	Chess::Move chessMove = chessBoard->moveFromString(move);
+	QVERIFY(!chessMove.isNull());
+
+	// Act
+	boardScene.makeMove(chessMove);
+
+	// Assert
+	verifySynchronization(boardScene);
+	QCOMPARE(chessBoard->result().type(), expectedResult);
+
 }
 
 QTEST_MAIN(tst_BoardScene)
