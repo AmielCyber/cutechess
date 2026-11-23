@@ -288,7 +288,7 @@ if(WITH_TESTS)
 		target_compile_definitions(test_${test_name} PRIVATE CUTECHESS_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/projects/lib/tests/data")
 		target_compile_definitions(test_${test_name} PRIVATE CUTECHESS_JSON_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/projects/lib/components/json/tests/data")
 		add_test(test_${test_name} test_${test_name})
-	endmacro(add_unit_test)
+    endmacro(add_unit_test)
 
 	add_unit_test(chessboard projects/lib/tests/chessboard/tst_board.cpp)
 	add_unit_test(tb projects/lib/tests/tb/tst_tb.cpp)
@@ -302,6 +302,37 @@ if(WITH_TESTS)
 	add_unit_test(pgngame projects/lib/tests/pgngame/tst_pgngame.cpp)
 	add_unit_test(jsonparser projects/lib/components/json/tests/parser/tst_jsonparser.cpp)
 	add_unit_test(jsonserializer projects/lib/components/json/tests/serializer/tst_jsonserializer.cpp)
+endif()
+
+# GUI TESTS
+if(WITH_TESTS)
+    set(BOARDSCENE_TEST_SOURCES
+        projects/gui/src/boardview/boardscene.cpp
+        projects/gui/src/boardview/graphicsboard.cpp
+        projects/gui/src/boardview/graphicspiece.cpp
+        projects/gui/src/boardview/graphicspiecereserve.cpp
+        projects/gui/src/boardview/piecechooser.cpp
+        projects/gui/res/chessboard/chessboard.qrc
+    )
+macro(add_gui_test test_name test_src)
+    add_executable(test_${test_name} ${test_src})
+
+    target_include_directories(
+        test_${test_name}
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/projects/gui/src
+    )
+target_link_libraries(test_${test_name} PRIVATE Qt::Core Qt::Gui Qt::Widgets Qt::Svg Qt::Test lib)
+add_test(test_${test_name} test_${test_name})
+
+set_tests_properties(
+    test_${test_name}
+    PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)
+endmacro(add_gui_test)
+
+add_gui_test(boardscene projects/gui/tests/boardscene/tst_boardscene.cpp)
+target_sources(test_boardscene PRIVATE ${BOARDSCENE_TEST_SOURCES})
 endif()
 
 install(TARGETS cli DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime)
